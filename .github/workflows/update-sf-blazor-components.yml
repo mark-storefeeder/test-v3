@@ -6,7 +6,7 @@ on:
 
 jobs:
   update-sf-blazor-components:
-    if: github.event.label.name == 'ready-for-dev-testing'
+    if: github.event.label.name == 'ready for dev testing'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
