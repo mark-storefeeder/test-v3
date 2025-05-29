@@ -1,0 +1,3 @@
+[submodule "modules/test-components"]
+	path = modules/test-components
+	url = https://github.com/mark-storefeeder/test-components.git
