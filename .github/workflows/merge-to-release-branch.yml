@@ -1,11 +1,11 @@
-name: Merge to Release Branch
+name: Merge to release branch
 
 on:
   pull_request:
     types: [labeled, opened, reopened, synchronize]
 
 jobs:
-  merge-to-release:
+  merge-to-release-branch:
     if: contains(github.event.pull_request.labels.*.name, 'ready for dev testing')
     uses: ./.github/workflows/update-sf-blazor-components.yml
     with:
