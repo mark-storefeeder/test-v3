@@ -1,22 +1,24 @@
 name: Update SfBlazor.Components
 
 on:
-  pull_request:
-    types: [labeled]
+  workflow_call:
+    inputs:
+      head_ref:
+        required: true
+        type: string
 
 jobs:
   update-sf-blazor-components:
-    if: github.event.label.name == 'ready for dev testing'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: main
+          ref: ${{ inputs.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check if release/dev branch exists
+      - name: Check if SfBlazor.Components release/dev branch exists
         id: check-branch
         run: |
           git ls-remote --heads https://github.com/mark-storefeeder/test-components.git release/dev
@@ -26,7 +28,7 @@ jobs:
             echo "branch_exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update submodule
+      - name: Update SfBlazor.Components submodule
         if: steps.check-branch.outputs.branch_exists == 'true'
         run: |
           git submodule update --init --recursive
@@ -34,8 +36,12 @@ jobs:
           git fetch origin release/dev
           git checkout release/dev
           cd ../..
-          git add test-components
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@github.com'
-          git commit -m "Update test-components submodule to release/dev branch"
-          git push
+          git add modules/test-components
+          if git diff --staged --quiet; then
+            echo 'No changes to commit'
+          else
+            git config --global user.name 'GitHub Actions'
+            git config --global user.email 'github-actions@github.com'
+            git commit -m 'Update SfBlazor to reference release/dev branch'
+            git push origin HEAD:${{ inputs.head_ref }}
+          fi
