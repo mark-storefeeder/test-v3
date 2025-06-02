@@ -27,6 +27,8 @@ jobs:
           BASE_REF=$(echo "$PR_DETAILS" | jq -r .baseRefName)
           echo "head_ref=$HEAD_REF" >> $GITHUB_OUTPUT
           echo "base_ref=$BASE_REF" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Resolve submodule conflicts
         run: |
@@ -45,5 +47,3 @@ jobs:
           else
             echo "No submodule conflicts to resolve in PR #${{ inputs.pull_request_number }}"
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
