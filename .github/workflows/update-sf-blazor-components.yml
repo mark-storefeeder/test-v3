@@ -3,20 +3,20 @@ name: Update SfBlazor.Components
 on:
   workflow_dispatch:
     inputs:
-      branch_name:
-        description: 'Branch'
+      v3_branch_name:
+        description: "V3 Branch"
         required: true
         type: choice
         options:
           - release/dev
           - release/uat
           - other
-      other_branch_name:
-        description: "'Other' branch name"
+      v3_other_branch_name:
+        description: "'Other' V3 branch name"
         required: false
         type: string
       sfblazor_branch_name:
-        description: 'SfBlazor.Components branch'
+        description: "SfBlazor.Components branch"
         required: true
         type: choice
         options:
@@ -39,38 +39,24 @@ jobs:
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check if SfBlazor.Components release/dev branch exists
-        id: check-branch
+      - name: Resolve branch names
+        id: resolve-branch-names
         run: |
-          git ls-remote --heads https://github.com/mark-storefeeder/test-components.git release/dev
-          if [ $? -eq 0 ]; then
-            echo "branch_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "branch_exists=false" >> $GITHUB_OUTPUT
-          fi
+          echo "v3_branch_name=${{ inputs.v3_branch_name == 'other' && inputs.v3_other_branch_name || inputs.v3_branch_name }}" >> $GITHUB_OUTPUT
+          echo "sfblazor_branch_name=${{ inputs.sfblazor_branch_name == 'other' && inputs.sfblazor_other_branch_name || inputs.sfblazor_branch_name }}" >> $GITHUB_OUTPUT
 
-      - name: Get branch name 1
-        id: get-branch-1
+      - name: Check that branches exist
         run: |
-          if [ "${{ inputs.branch_name }}" = "other" ]; then
-            echo "branch_name=${{ inputs.other_branch_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "branch_name=${{ inputs.branch_name }}" >> $GITHUB_OUTPUT
+          if ! gh api repos/${{ github.repository }}/branches/${{ steps.resolve-branch-names.outputs.v3_branch_name }} --jq .name 2>/dev/null; then
+            echo "The branch ${{ steps.resolve-branch-names.outputs.v3_branch_name }} does not exist in this repository"
+            exit 1
           fi
-
-      - name: Get branch name 2
-        id: get-branch-2
-        run: |
-          if [ "${{ inputs.sfblazor_branch_name }}" = "other" ]; then
-            echo "branch_name=${{ inputs.sfblazor_other_branch_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "branch_name=${{ inputs.sfblazor_branch_name }}" >> $GITHUB_OUTPUT
+          if ! gh api repos/mark-storefeeder/test-components/branches/${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} --jq .name 2>/dev/null; then
+            echo "The branch ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
+            exit 1
           fi
-
-      - name: Output determined branch names
-        run: |
-          echo "Branch 1: ${{ steps.get-branch-1.outputs.branch_name }}"
-          echo "Branch 2: ${{ steps.get-branch-2.outputs.branch_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 #      - name: Update SfBlazor.Components submodule
 #        if: steps.check-branch.outputs.branch_exists == 'true'
