@@ -1,10 +1,31 @@
 name: Update SfBlazor.Components
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      head_ref:
+      branch_name:
+        description: 'Branch'
         required: true
+        type: choice
+        options:
+          - release/dev
+          - release/uat
+          - other
+      other_branch_name:
+        description: "'Other' branch name"
+        required: false
+        type: string
+      sfblazor_branch_name:
+        description: 'SfBlazor.Components branch'
+        required: true
+        type: choice
+        options:
+          - release/dev
+          - release/uat
+          - other
+      sfblazor_other_branch_name:
+        description: "'Other' SfBlazor.Components branch name"
+        required: false
         type: string
 
 jobs:
@@ -15,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.head_ref }}
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check if SfBlazor.Components release/dev branch exists
@@ -28,20 +49,43 @@ jobs:
             echo "branch_exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update SfBlazor.Components submodule
-        if: steps.check-branch.outputs.branch_exists == 'true'
+      - name: Get branch name 1
+        id: get-branch-1
         run: |
-          git submodule update --init --recursive
-          cd modules/test-components
-          git fetch origin release/dev
-          git checkout release/dev
-          cd ../..
-          git add modules/test-components
-          if git diff --staged --quiet; then
-            echo 'No changes to commit'
+          if [ "${{ inputs.branch_name }}" = "other" ]; then
+            echo "branch_name=${{ inputs.other_branch_name }}" >> $GITHUB_OUTPUT
           else
-            git config --global user.name 'GitHub Actions'
-            git config --global user.email 'github-actions@github.com'
-            git commit -m 'Update SfBlazor to reference release/dev branch'
-            git push origin HEAD:${{ inputs.head_ref }}
+            echo "branch_name=${{ inputs.branch_name }}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Get branch name 2
+        id: get-branch-2
+        run: |
+          if [ "${{ inputs.sfblazor_branch_name }}" = "other" ]; then
+            echo "branch_name=${{ inputs.sfblazor_other_branch_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch_name=${{ inputs.sfblazor_branch_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Output determined branch names
+        run: |
+          echo "Branch 1: ${{ steps.get-branch-1.outputs.branch_name }}"
+          echo "Branch 2: ${{ steps.get-branch-2.outputs.branch_name }}"
+
+#      - name: Update SfBlazor.Components submodule
+#        if: steps.check-branch.outputs.branch_exists == 'true'
+#        run: |
+#          git submodule update --init --recursive
+#          cd modules/test-components
+#          git fetch origin release/dev
+#          git checkout release/dev
+#          cd ../..
+#          git add modules/test-components
+#          if git diff --staged --quiet; then
+#            echo 'No changes to commit'
+#          else
+#            git config --global user.name 'GitHub Actions'
+#            git config --global user.email 'github-actions@github.com'
+#            git commit -m 'Update SfBlazor to reference release/dev branch'
+#            git push origin HEAD:${{ inputs.head_ref }}
+#          fi
