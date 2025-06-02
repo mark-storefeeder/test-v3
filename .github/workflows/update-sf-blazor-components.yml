@@ -65,8 +65,8 @@ jobs:
         run: |
           git submodule update --init --recursive
           cd modules/test-components
-          git fetch origin ${{ steps.resolve-branch-names.outputs.v3_branch_name }}
-          git checkout ${{ steps.resolve-branch-names.outputs.v3_branch_name }}
+          git fetch origin ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }}
+          git checkout ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }}
           cd ../..
           git add modules/test-components
           if git diff --staged --quiet; then
@@ -74,7 +74,7 @@ jobs:
           else
             gh auth setup-git
             gh api --method POST /repos/${{ github.repository }}/git/commits \
-              -f message='Update SfBlazor to reference ${{ steps.resolve-branch-names.outputs.v3_branch_name }} branch' \
+              -f message='Update SfBlazor to reference ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} branch' \
               -f author='{"name": "GitHub Actions", "email": "github-actions@github.com"}' \
               -f committer='{"name": "GitHub Actions", "email": "github-actions@github.com"}' \
               --jq .sha | xargs -I {} git push origin {}:${{ github.head_ref }}
