@@ -53,7 +53,7 @@ jobs:
             git config --global user.name "GitHub Actions"
             git config --global user.email "github-actions@github.com"
             if [ "${{ inputs.squash_commit }}" = "true" ]; then
-              git commit --amend --no-edit
+              git commit --amend --no-edit --allow-empty
               git push --force origin ${{ inputs.v3_branch_name }}
             else
               git commit -m "Update SfBlazor to reference ${{ inputs.sfblazor_branch_name }} branch"
