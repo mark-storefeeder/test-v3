@@ -72,12 +72,8 @@ jobs:
           if git diff --staged --quiet; then
             echo 'No changes to commit'
           else
-            gh auth setup-git
-            gh api --method POST /repos/${{ github.repository }}/git/commits \
-              -f message='Update SfBlazor to reference ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} branch' \
-              -f author='{"name": "GitHub Actions", "email": "github-actions@github.com"}' \
-              -f committer='{"name": "GitHub Actions", "email": "github-actions@github.com"}' \
-              --jq .sha | xargs -I {} git push origin {}:${{ github.head_ref }}
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "github-actions@github.com"
+            git commit -m "Update SfBlazor to reference ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} branch"
+            git push origin HEAD:${{ steps.resolve-branch-names.outputs.v3_branch_name }}
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
