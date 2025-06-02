@@ -32,6 +32,13 @@ jobs:
   update-sf-blazor-components:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Resolve branch names
         id: resolve-branch-names
         run: |
@@ -68,5 +75,5 @@ jobs:
             git config --global user.name "GitHub Actions"
             git config --global user.email "github-actions@github.com"
             git commit -m "Update SfBlazor to reference ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} branch"
-            git push origin HEAD:${{ steps.resolve-branch-names.outputs.v3_branch_name }}
+            git push
           fi
