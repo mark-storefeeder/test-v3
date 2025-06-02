@@ -48,11 +48,13 @@ jobs:
       - name: Check that branches exist
         run: |
           if ! gh api repos/${{ github.repository }}/branches/${{ steps.resolve-branch-names.outputs.v3_branch_name }} --jq .name 2>/dev/null; then
-            echo "\nThe branch ${{ steps.resolve-branch-names.outputs.v3_branch_name }} does not exist in this repository"
+            echo ""
+            echo "The branch ${{ steps.resolve-branch-names.outputs.v3_branch_name }} does not exist in this repository"
             exit 1
           fi
           if ! gh api repos/mark-storefeeder/test-components/branches/${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} --jq .name 2>/dev/null; then
-            echo "\nThe branch ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
+            echo ""
+            echo "The branch ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
             exit 1
           fi
         env:
