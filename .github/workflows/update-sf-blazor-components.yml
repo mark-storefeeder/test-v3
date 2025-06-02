@@ -32,13 +32,6 @@ jobs:
   update-sf-blazor-components:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Resolve branch names
         id: resolve-branch-names
         run: |
