@@ -4,50 +4,26 @@ on:
   workflow_dispatch:
     inputs:
       v3_branch_name:
-        description: "V3 Branch"
+        description: "V3 branch"
         required: true
-        type: choice
-        options:
-          - release/dev
-          - release/uat
-          - other
-      v3_other_branch_name:
-        description: "'Other' V3 branch name"
-        required: false
-        type: string
       sfblazor_branch_name:
         description: "SfBlazor.Components branch"
         required: true
-        type: choice
-        options:
-          - release/dev
-          - release/uat
-          - other
-      sfblazor_other_branch_name:
-        description: "'Other' SfBlazor.Components branch name"
-        required: false
-        type: string
 
 jobs:
   update-sf-blazor-components:
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve branch names
-        id: resolve-branch-names
-        run: |
-          echo "v3_branch_name=${{ inputs.v3_branch_name == 'other' && inputs.v3_other_branch_name || inputs.v3_branch_name }}" >> $GITHUB_OUTPUT
-          echo "sfblazor_branch_name=${{ inputs.sfblazor_branch_name == 'other' && inputs.sfblazor_other_branch_name || inputs.sfblazor_branch_name }}" >> $GITHUB_OUTPUT
-
       - name: Check that branches exist
         run: |
-          if ! gh api repos/${{ github.repository }}/branches/${{ steps.resolve-branch-names.outputs.v3_branch_name }} --jq .name 2>/dev/null; then
+          if ! gh api repos/${{ github.repository }}/branches/${{ inputs.v3_branch_name }} --jq .name 2>/dev/null; then
             echo ""
-            echo "The branch ${{ steps.resolve-branch-names.outputs.v3_branch_name }} does not exist in this repository"
+            echo "The branch ${{ inputs.v3_branch_name }} does not exist in this repository"
             exit 1
           fi
-          if ! gh api repos/mark-storefeeder/test-components/branches/${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} --jq .name 2>/dev/null; then
+          if ! gh api repos/mark-storefeeder/test-components/branches/${{ inputs.sfblazor_branch_name }} --jq .name 2>/dev/null; then
             echo ""
-            echo "The branch ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
+            echo "The branch ${{ inputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
             exit 1
           fi
         env:
@@ -57,7 +33,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ steps.resolve-branch-names.outputs.v3_branch_name }}
+          ref: ${{ inputs.v3_branch_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update SfBlazor.Components submodule
@@ -65,8 +41,8 @@ jobs:
         run: |
           git submodule update --init --recursive
           cd modules/test-components
-          git fetch origin ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }}
-          git checkout ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }}
+          git fetch origin ${{ inputs.sfblazor_branch_name }}
+          git checkout ${{ inputs.sfblazor_branch_name }}
           cd ../..
           git add modules/test-components
           if git diff --staged --quiet; then
@@ -74,6 +50,6 @@ jobs:
           else
             git config --global user.name "GitHub Actions"
             git config --global user.email "github-actions@github.com"
-            git commit -m "Update SfBlazor to reference ${{ steps.resolve-branch-names.outputs.sfblazor_branch_name }} branch"
-            git push origin ${{ steps.resolve-branch-names.outputs.v3_branch_name }}
+            git commit -m "Update SfBlazor to reference ${{ inputs.sfblazor_branch_name }} branch"
+            git push origin ${{ inputs.v3_branch_name }}
           fi
