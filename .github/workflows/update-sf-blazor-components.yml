@@ -21,11 +21,11 @@ jobs:
       - name: Check that branches exist
         run: |
           if ! gh api repos/${{ github.repository }}/branches/${{ inputs.v3_branch_name }} --jq .name 2>/dev/null; then
-            echo -e "\nThe branch ${{ inputs.v3_branch_name }} does not exist in this repository"
+            echo --escape "\nThe branch ${{ inputs.v3_branch_name }} does not exist in this repository"
             exit 1
           fi
           if ! gh api repos/mark-storefeeder/test-components/branches/${{ inputs.sfblazor_branch_name }} --jq .name 2>/dev/null; then
-            echo -e "\nThe branch ${{ inputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
+            echo --escape "\nThe branch ${{ inputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
             exit 1
           fi
         env:
@@ -46,7 +46,8 @@ jobs:
           git fetch origin ${{ inputs.sfblazor_branch_name }}
           git checkout ${{ inputs.sfblazor_branch_name }}
           cd ../..
-          git add modules/test-components
+          # Force add the submodule changes to resolve any conflicts
+          git add --force modules/test-components
           if git diff --staged --quiet; then
             echo 'No changes to commit'
           else
@@ -56,7 +57,7 @@ jobs:
               git commit --amend --no-edit --allow-empty
               git push --force origin ${{ inputs.v3_branch_name }}
             else
-              git commit -m "Update SfBlazor to reference ${{ inputs.sfblazor_branch_name }} branch"
+              git commit --message "Update SfBlazor to reference ${{ inputs.sfblazor_branch_name }} branch"
               git push origin ${{ inputs.v3_branch_name }}
             fi
           fi
