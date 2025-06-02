@@ -9,6 +9,10 @@ on:
       sfblazor_branch_name:
         description: "SfBlazor.Components branch"
         required: true
+      squash_commit:
+        description: "Squash the update commit into the previous commit"
+        type: boolean
+        default: true
 
 jobs:
   update-sf-blazor-components:
@@ -17,13 +21,11 @@ jobs:
       - name: Check that branches exist
         run: |
           if ! gh api repos/${{ github.repository }}/branches/${{ inputs.v3_branch_name }} --jq .name 2>/dev/null; then
-            echo ""
-            echo "The branch ${{ inputs.v3_branch_name }} does not exist in this repository"
+            echo -e "\nThe branch ${{ inputs.v3_branch_name }} does not exist in this repository"
             exit 1
           fi
           if ! gh api repos/mark-storefeeder/test-components/branches/${{ inputs.sfblazor_branch_name }} --jq .name 2>/dev/null; then
-            echo ""
-            echo "The branch ${{ inputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
+            echo -e "\nThe branch ${{ inputs.sfblazor_branch_name }} does not exist in the SfBlazor.Components repository"
             exit 1
           fi
         env:
@@ -50,6 +52,11 @@ jobs:
           else
             git config --global user.name "GitHub Actions"
             git config --global user.email "github-actions@github.com"
-            git commit -m "Update SfBlazor to reference ${{ inputs.sfblazor_branch_name }} branch"
-            git push origin ${{ inputs.v3_branch_name }}
+            if [ "${{ inputs.squash_commit }}" = "true" ]; then
+              git commit --amend --no-edit
+              git push --force origin ${{ inputs.v3_branch_name }}
+            else
+              git commit -m "Update SfBlazor to reference ${{ inputs.sfblazor_branch_name }} branch"
+              git push origin ${{ inputs.v3_branch_name }}
+            fi
           fi
