@@ -60,20 +60,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: Update SfBlazor.Components submodule
-#        if: steps.check-branch.outputs.branch_exists == 'true'
-#        run: |
-#          git submodule update --init --recursive
-#          cd modules/test-components
-#          git fetch origin release/dev
-#          git checkout release/dev
-#          cd ../..
-#          git add modules/test-components
-#          if git diff --staged --quiet; then
-#            echo 'No changes to commit'
-#          else
-#            git config --global user.name 'GitHub Actions'
-#            git config --global user.email 'github-actions@github.com'
-#            git commit -m 'Update SfBlazor to reference release/dev branch'
-#            git push origin HEAD:${{ inputs.head_ref }}
-#          fi
+      - name: Update SfBlazor.Components submodule
+        #if: steps.check-branch.outputs.branch_exists == 'true'
+        run: |
+          git submodule update --init --recursive
+          cd modules/test-components
+          git fetch origin ${{ steps.resolve-branch-names.outputs.v3_branch_name }}
+          git checkout ${{ steps.resolve-branch-names.outputs.v3_branch_name }}
+          cd ../..
+          git add modules/test-components
+          if git diff --staged --quiet; then
+            echo 'No changes to commit'
+          else
+            gh auth setup-git
+            gh api --method POST /repos/${{ github.repository }}/git/commits \
+              -f message='Update SfBlazor to reference ${{ steps.resolve-branch-names.outputs.v3_branch_name }} branch' \
+              -f author='{"name": "GitHub Actions", "email": "github-actions@github.com"}' \
+              -f committer='{"name": "GitHub Actions", "email": "github-actions@github.com"}' \
+              --jq .sha | xargs -I {} git push origin {}:${{ github.head_ref }}
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
