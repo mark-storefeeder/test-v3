@@ -37,7 +37,7 @@ jobs:
           git checkout ${{ steps.pr.outputs.head_ref }}
           
           # Force add the submodule to resolve conflicts
-          git add --force modules/sf-blazor-components
+          git add --force modules/test-components
           if ! git diff --staged --quiet; then
             git config --global user.name "GitHub Actions"
             git config --global user.email "github-actions@github.com"
