@@ -46,8 +46,7 @@ jobs:
           git fetch origin ${{ inputs.sfblazor_branch_name }}
           git checkout ${{ inputs.sfblazor_branch_name }}
           cd ../..
-          # Force add the submodule changes to resolve any conflicts
-          git add --force modules/test-components
+          git add modules/test-components
           if git diff --staged --quiet; then
             echo 'No changes to commit'
           else
