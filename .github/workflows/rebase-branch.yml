@@ -54,8 +54,17 @@ jobs:
               git rebase origin/${{ inputs.base_branch }}
               
               # When we hit the submodule conflict, we'll be in a rebase state
-              # Force add the submodule to resolve conflicts
-              git add --force modules/test-components
+              # Get the commit hash from the branch being rebased
+              SUBMODULE_COMMIT=$(git rev-parse HEAD:modules/test-components)
+              
+              # Go into the submodule and checkout the correct commit
+              cd modules/test-components
+              git fetch origin
+              git checkout $SUBMODULE_COMMIT
+              cd ../..
+              
+              # Add the submodule to resolve the conflict
+              git add modules/test-components
               
               # Continue the rebase
               git rebase --continue
