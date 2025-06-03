@@ -51,4 +51,4 @@ jobs:
               echo "Rebase failed with non-submodule conflicts. Please resolve conflicts manually."
               exit 1
             fi
-          fi 
+          fi
