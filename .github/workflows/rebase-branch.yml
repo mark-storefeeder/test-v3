@@ -30,13 +30,13 @@ jobs:
       - name: Rebase branch
         run: |
           # Fetch all branches
-          git fetch origin
+          #git fetch origin
           
           # Checkout the branch to rebase
           git checkout ${{ inputs.branch }}
           
           # Initialize and update submodules
-          git submodule update --init --recursive
+          #git submodule update --init --recursive
           
           # Rebase onto the base branch
           if git rebase origin/${{ inputs.base_branch }}; then
