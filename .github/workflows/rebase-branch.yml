@@ -47,9 +47,17 @@ jobs:
             # If rebase failed, check if it's due to submodule conflicts
             if git diff --name-only | grep -q "modules/test-components"; then
               echo "Detected submodule conflicts in modules/test-components"
+              echo "HERE"
+              echo ""
 
               git add modules/test-components
-              git rebase --continue
+
+              echo "DONE THAT"
+
+              #git rebase --continue
+              git -c core.editor=true rebase --continue
+
+              echo "DONE THAT 2"
 
               ######### Abort the current rebase
               ########git rebase --abort
