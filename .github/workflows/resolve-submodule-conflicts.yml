@@ -1,5 +1,7 @@
 name: Resolve Submodule Conflicts
 
+# This workflow makes no sense! It should rebase instead.
+
 on:
   workflow_dispatch:
     inputs:

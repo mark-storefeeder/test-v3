@@ -1,0 +1,66 @@
+name: Rebase Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to rebase'
+        required: true
+        type: string
+      base_branch:
+        description: 'Base branch to rebase onto'
+        required: true
+        type: string
+
+jobs:
+  rebase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Rebase branch
+        run: |
+          # Fetch all branches
+          git fetch origin
+          
+          # Checkout the branch to rebase
+          git checkout ${{ inputs.branch }}
+          
+          # Rebase onto the base branch
+          if git rebase origin/${{ inputs.base_branch }}; then
+            # Force push the rebased branch
+            # git push origin ${{ inputs.branch }} --force-with-lease
+            echo "Successfully rebased ${{ inputs.branch }} onto ${{ inputs.base_branch }}"
+          else
+            # If rebase failed, check if it's due to submodule conflicts
+            if git diff --name-only | grep -q "modules/test-components"; then
+              echo "Detected submodule conflicts in modules/test-components"
+              # Abort the current rebase
+              git rebase --abort
+              
+              # Start a new rebase with the submodule strategy
+              git rebase origin/${{ inputs.base_branch }} --strategy-option=submodule=checkout
+              
+              # Force add the submodule to resolve conflicts
+              git add --force modules/test-components
+              
+              # Continue the rebase
+              git rebase --continue
+              
+              # Force push the rebased branch
+              # git push origin ${{ inputs.branch }} --force-with-lease
+              echo "Successfully rebased ${{ inputs.branch }} onto ${{ inputs.base_branch }} with submodule conflict resolution"
+            else
+              echo "Rebase failed with non-submodule conflicts. Please resolve conflicts manually."
+              exit 1
+            fi
+          fi 
