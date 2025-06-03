@@ -39,7 +39,7 @@ jobs:
           git submodule update --init --recursive
           
           # Rebase onto the base branch
-          if git rebase origin/${{ inputs.base_branch }}; then
+          if git -c advice.submoduleMergeConflict=false rebase origin/${{ inputs.base_branch }}; then
             # Force push the rebased branch
             # git push origin ${{ inputs.branch }} --force-with-lease
             echo "Successfully rebased ${{ inputs.branch }} onto ${{ inputs.base_branch }}"
@@ -47,17 +47,9 @@ jobs:
             # If rebase failed, check if it's due to submodule conflicts
             if git diff --name-only | grep -q "modules/test-components"; then
               echo "Detected submodule conflicts in modules/test-components"
-              echo "HERE"
-              echo ""
 
               git add modules/test-components
-
-              echo "DONE THAT"
-
-              #git rebase --continue
               git -c core.editor=true rebase --continue
-
-              echo "DONE THAT 2"
 
               ######### Abort the current rebase
               ########git rebase --abort
@@ -81,8 +73,9 @@ jobs:
               ######### Continue the rebase
               ########git rebase --continue
               ########
-              ######### Force push the rebased branch
-              ######### git push origin ${{ inputs.branch }} --force-with-lease
+
+              # Force push the rebased branch
+              # git push origin ${{ inputs.branch }} --force-with-lease
               echo "Successfully rebased ${{ inputs.branch }} onto ${{ inputs.base_branch }} with submodule conflict resolution"
             else
               echo "Rebase failed with non-submodule conflicts. Please resolve conflicts manually."
