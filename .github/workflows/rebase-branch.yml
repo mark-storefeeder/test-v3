@@ -35,6 +35,9 @@ jobs:
           # Checkout the branch to rebase
           git checkout ${{ inputs.branch }}
           
+          # Initialize and update submodules
+          git submodule update --init --recursive
+          
           # Rebase onto the base branch
           if git rebase origin/${{ inputs.base_branch }}; then
             # Force push the rebased branch
@@ -47,9 +50,10 @@ jobs:
               # Abort the current rebase
               git rebase --abort
               
-              # Start a new rebase with the submodule strategy
-              git rebase origin/${{ inputs.base_branch }} --strategy-option=submodule=checkout
+              # Start a new rebase
+              git rebase origin/${{ inputs.base_branch }}
               
+              # When we hit the submodule conflict, we'll be in a rebase state
               # Force add the submodule to resolve conflicts
               git add --force modules/test-components
               
