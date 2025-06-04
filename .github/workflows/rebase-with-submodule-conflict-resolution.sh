@@ -40,7 +40,7 @@ if ! git submodule update --init --recursive; then
   exit 1
 fi
 
-if output=$(gitz -c advice.mergeConflict=false -c advice.submoduleMergeConflict=false rebase origin/$base_branch 2>&1); then
+if output=$(git -c advice.mergeConflict=false -c advice.submoduleMergeConflict=false rebase origin/$base_branch 2>&1); then
   # git push origin $branch_to_rebase --force-with-lease
   echo "::notice::Successfully rebased $branch_to_rebase onto $base_branch."
 else
