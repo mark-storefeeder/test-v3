@@ -12,7 +12,7 @@ run_command() {
   fi
 }
 
-run_command git reset
+run_command git restore .
 run_command git checkout $branch_to_rebase
 run_command git submodule update --init --recursive
 
