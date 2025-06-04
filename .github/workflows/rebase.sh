@@ -12,7 +12,7 @@ run_command() {
   fi
 }
 
-run_command git restore .
+run_command git restore . # Because we've given execute permissions to the script, we need to revert the change before checking out another branch
 run_command git checkout $branch_to_rebase
 run_command git submodule update --init --recursive
 
@@ -25,7 +25,11 @@ handle_conflicts() {
       handle_conflicts # Recursively call handle_conflicts to handle multiple conflicts
     fi
   else
-    echo "ERROR: $branch_to_rebase could not be rebased onto $base_branch because of non-submodule conflicts (or an unhandled error)."
+    if git diff --name-only | grep -q .; then
+      echo "ERROR: $branch_to_rebase could not be rebased onto $base_branch because of non-submodule conflicts. Please handle conflicts manually instead."
+    else
+      echo "ERROR: $branch_to_rebase could not be rebased onto $base_branch because of an unhandled error."
+    fi
     run_command git rebase --abort
     exit 1
   fi
