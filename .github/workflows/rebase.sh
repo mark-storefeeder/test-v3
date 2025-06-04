@@ -12,7 +12,7 @@ run_command() {
   fi
 }
 
-run_command git checkout $branch_to_rebase
+#run_command git checkout $branch_to_rebase
 run_command git submodule update --init --recursive
 
 handle_conflicts() {
