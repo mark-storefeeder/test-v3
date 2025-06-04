@@ -18,7 +18,7 @@ handle_conflicts() {
       handle_conflicts # Recursively call handle_conflicts to handle multiple conflicts
     fi
   else
-    echo "::error::Could not rebase $branch_to_rebase onto $base_branch because of non-submodule conflicts. Please rebase manually instead."
+    echo "::error::Could not rebase $branch_to_rebase onto $base_branch due to non-submodule conflicts. Please rebase manually instead."
     git rebase --abort
     exit 1
   fi
