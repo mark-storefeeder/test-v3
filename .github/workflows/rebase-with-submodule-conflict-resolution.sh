@@ -20,7 +20,7 @@ handle_conflicts() {
       handle_conflicts # Recursively call handle_conflicts to handle multiple conflicts
     fi
   else
-    echo "ERROR: $branch_to_rebase could not be rebased onto $base_branch because of non-submodule conflicts (or an unhandled error). Please rebase manually instead."
+    echo "ERROR: $branch_to_rebase could not be rebased onto $base_branch because of non-submodule conflicts. Please rebase manually instead."
     git rebase --abort
     exit 1
   fi
@@ -40,11 +40,17 @@ if ! git submodule update --init --recursive; then
   exit 1
 fi
 
-if git -c advice.mergeConflict=false -c advice.submoduleMergeConflict=false rebase $base_branch; then
+if git -c advice.mergeConflict=false -c advice.submoduleMergeConflict=false rebase origin/$base_branch; then
   # git push origin $branch_to_rebase --force-with-lease
   echo "SUCCESS: $branch_to_rebase was rebased onto $base_branch."
 else
-  handle_conflicts
-  # git push origin $branch_to_rebase --force-with-lease
-  echo "SUCCESS: $branch_to_rebase was rebased onto $base_branch with submodule conflict resolution."
+  # Check if we're in a rebase state (which indicates conflicts)
+  if [ -d ".git/rebase-merge" ] || [ -d ".git/rebase-apply" ]; then
+    handle_conflicts
+    # git push origin $branch_to_rebase --force-with-lease
+    echo "SUCCESS: $branch_to_rebase was rebased onto $base_branch with submodule conflict resolution."
+  else
+    echo "ERROR: $branch_to_rebase could not be rebased onto $base_branch due to an unhandled error."
+    exit 1
+  fi
 fi
