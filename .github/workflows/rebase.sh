@@ -12,7 +12,7 @@ run_command() {
   fi
 }
 
-run_command git restore . # Because we've given execute permissions to the script, we need to revert the change before checking out another branch
+#run_command git restore . # Because we've given execute permissions to the script, we need to revert the change before checking out another branch
 run_command git checkout $branch_to_rebase
 run_command git submodule update --init --recursive
 
