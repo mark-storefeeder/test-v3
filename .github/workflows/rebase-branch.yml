@@ -11,6 +11,9 @@ on:
         description: 'Base branch to rebase onto'
         required: true
         type: string
+      verbose_output:
+        description: 'Verbose output'
+        type: boolean
 
 jobs:
   rebase:
@@ -30,4 +33,4 @@ jobs:
       - name: Rebase branch
         run: |
           chmod +x .github/workflows/rebase.sh
-          .github/workflows/rebase.sh ${{ inputs.branch_to_rebase }} ${{ inputs.base_branch }}
+          .github/workflows/rebase.sh ${{ inputs.branch_to_rebase }} ${{ inputs.base_branch }} ${{ inputs.verbose_output }}
