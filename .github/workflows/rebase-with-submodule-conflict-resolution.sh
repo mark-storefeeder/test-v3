@@ -28,8 +28,6 @@ current_branch=$(git branch --show-current)
 
 trap cleanup EXIT
 
-git restore . # Because we've given execute permissions to the script, we need to revert the change before checking out another branch
-
 if ! git checkout $branch_to_rebase; then
   echo "::error::Could not checkout $branch_to_rebase."
   exit 1

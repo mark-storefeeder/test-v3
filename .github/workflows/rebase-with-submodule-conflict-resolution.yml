@@ -24,7 +24,6 @@ jobs:
 
       - name: Check branches exist
         run: |
-          chmod +x .github/workflows/check-branch-exists.sh
           if ! ./.github/workflows/check-branch-exists.sh ${{ github.repository }} ${{ inputs.branch_to_rebase }}; then
             exit 1
           fi
@@ -39,5 +38,4 @@ jobs:
 
       - name: Rebase branch
         run: |
-          chmod +x .github/workflows/rebase-with-submodule-conflict-resolution.sh
           ./.github/workflows/rebase-with-submodule-conflict-resolution.sh ${{ inputs.branch_to_rebase }} ${{ inputs.base_branch }} modules/test-components
