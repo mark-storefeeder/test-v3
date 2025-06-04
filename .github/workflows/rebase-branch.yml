@@ -28,4 +28,6 @@ jobs:
           git config --global user.email "github-actions@github.com"
 
       - name: Rebase branch
-        run: ./rebase.sh ${{ inputs.branch_to_rebase }} ${{ inputs.base_branch }}
+        run: |
+          chmod +x .github/workflows/rebase.sh
+          .github/workflows/rebase.sh ${{ inputs.branch_to_rebase }} ${{ inputs.base_branch }}
