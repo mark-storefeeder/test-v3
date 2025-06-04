@@ -3,17 +3,13 @@ branch_to_rebase=$1
 base_branch=$2
 submodule_path=$3
 
-git restore . # Because we've given execute permissions to the script, we need to revert the change before checking out another branch
+current_branch=$(git branch --show-current)
 
-if ! git checkout $branch_to_rebase; then
-  echo "ERROR: $branch_to_rebase could not be checked out."
-  exit 1
-fi
-
-if ! git submodule update --init --recursive; then
-  echo "ERROR: $branch_to_rebase submodule update failed."
-  exit 1
-fi
+cleanup() {
+  # Cleanup after ourselves in case subsequent scripts need to run
+  git checkout $current_branch
+  git submodule update --init --recursive
+}
 
 handle_conflicts() {
   # Check whether there are any submodule conflicts
@@ -30,7 +26,21 @@ handle_conflicts() {
   fi
 }
 
-if git -c advice.mergeConflict=false -c advice.submoduleMergeConflict=false rebase origin/$base_branch; then
+trap cleanup EXIT
+
+git restore . # Because we've given execute permissions to the script, we need to revert the change before checking out another branch
+
+if ! git checkout $branch_to_rebase; then
+  echo "ERROR: $branch_to_rebase could not be checked out."
+  exit 1
+fi
+
+if ! git submodule update --init --recursive; then
+  echo "ERROR: $branch_to_rebase submodule update failed."
+  exit 1
+fi
+
+if git -c advice.mergeConflict=false -c advice.submoduleMergeConflict=false rebase $base_branch; then
   # git push origin $branch_to_rebase --force-with-lease
   echo "SUCCESS: $branch_to_rebase was rebased onto $base_branch."
 else
