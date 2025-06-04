@@ -26,7 +26,7 @@ fi
 
 handle_conflicts() {
   # Check whether there are any submodule conflicts
-  if git diff --name-only | grep -q "modules/test-components"; then
+  if git diff --name-only --diff-filter=U | grep -q "modules/test-components"; then
     git add modules/test-components # Resolve the submodule conflict using the version in the branch that's being rebased - it'll get updated to the correct version later anyway
 
     if ! run_command git -c advice.mergeConflict=false -c core.editor=true rebase --continue; then
@@ -34,7 +34,7 @@ handle_conflicts() {
     fi
   else
     echo "ERROR: $branch_to_rebase could not be rebased onto $base_branch because of non-submodule conflicts (or an unhandled error). Please rebase manually instead."
-    #run_command git rebase --abort
+    run_command git rebase --abort
     exit 1
   fi
 }
