@@ -13,8 +13,16 @@ run_command() {
 }
 
 run_command git restore . # Because we've given execute permissions to the script, we need to revert the change before checking out another branch
-run_command git checkout $branch_to_rebase
-run_command git submodule update --init --recursive
+
+if ! run_command git checkout $branch_to_rebase; then
+  echo "ERROR: $branch_to_rebase could not be checked out."
+  exit 1
+fi
+
+if ! run_command git submodule update --init --recursive; then
+  echo "ERROR: $branch_to_rebase submodule update failed."
+  exit 1
+fi
 
 handle_conflicts() {
   # Check whether there are any submodule conflicts
