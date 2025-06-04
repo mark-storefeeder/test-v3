@@ -34,7 +34,7 @@ handle_conflicts() {
     fi
   else
     echo "ERROR: $branch_to_rebase could not be rebased onto $base_branch because of non-submodule conflicts (or an unhandled error). Please rebase manually instead."
-    run_command git rebase --abort
+    #run_command git rebase --abort
     exit 1
   fi
 }
