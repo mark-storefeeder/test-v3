@@ -1,4 +1,4 @@
-name: Rebase Branch
+name: Rebase with submodule conflict resolution
 
 on:
   workflow_dispatch:
@@ -11,12 +11,9 @@ on:
         description: 'Base branch to rebase onto'
         required: true
         type: string
-      verbose_output:
-        description: 'Verbose output'
-        type: boolean
 
 jobs:
-  rebase:
+  rebase-with-submodule-conflict-resolution:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,5 +29,5 @@ jobs:
 
       - name: Rebase branch
         run: |
-          chmod +x .github/workflows/rebase.sh
-          .github/workflows/rebase.sh ${{ inputs.branch_to_rebase }} ${{ inputs.base_branch }} ${{ inputs.verbose_output }}
+          chmod +x .github/workflows/rebase-with-submodule-conflict-resolution.sh
+          .github/workflows/rebase-with-submodule-conflict-resolution.sh ${{ inputs.branch_to_rebase }} ${{ inputs.base_branch }} modules/test-components
