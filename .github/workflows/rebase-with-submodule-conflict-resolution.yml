@@ -30,6 +30,8 @@ jobs:
           if ! ./.github/workflows/check-branch-exists.sh ${{ github.repository }} ${{ inputs.base_branch }}; then
             exit 1
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
