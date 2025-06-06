@@ -1,0 +1,57 @@
+name: Merge to release branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source branch'
+        type: string
+        required: true
+      target_branch:
+        description: 'Target branch'
+        type: choice
+        options:
+          - release/dev
+          - release/uat
+      require_approval:
+        description: 'Require dev approval'
+        type: boolean
+        default: true
+      squash_sfblazor_components_update_commit:
+        description: 'Squash SfBlazor.Components update commit in to previous commit'
+        type: boolean
+        default: true
+      merge_strategy:
+        description: 'Merge strategy'
+        type: choice
+        options:
+          - Auto (based on label)
+          - Squash
+          - Rebase
+
+jobs:
+  merge-to-release-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify source branch exists
+        run: |
+          if ! ./.github/workflows/scripts/verify-branch-exists.sh ${{ github.repository }} ${{ inputs.source_branch }}; then
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Rebase branch
+        run: |
+          ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh ${{ inputs.source_branch }} ${{ inputs.target_branch }} modules/test-components
