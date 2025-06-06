@@ -21,7 +21,7 @@ on:
           - Squash
           - Rebase
       require_approval:
-        description: 'Require dev approval'
+        description: 'Require approval from dev team member'
         type: boolean
         default: true
       squash_sfblazor_components_update_commit:
@@ -56,9 +56,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Echo pull request number
+      - name: Verify dev team approval
+        if: ${{ inputs.require_approval }}
         run: |
-          echo "PR #${{ steps.get_pr_number.outputs.pr_number }}"
+          if ! ./.github/workflows/scripts/verify-pull-request-approval-status.sh ${{ steps.get_pr_number.outputs.pr_number }} "storefeeder-classic-v3-dev-team"; then
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
