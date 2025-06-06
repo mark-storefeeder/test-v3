@@ -13,6 +13,13 @@ on:
         options:
           - release/dev
           - release/uat
+      merge_strategy:
+        description: 'Merge strategy'
+        type: choice
+        options:
+          - Auto (based on label)
+          - Squash
+          - Rebase
       require_approval:
         description: 'Require dev approval'
         type: boolean
@@ -21,13 +28,6 @@ on:
         description: 'Squash SfBlazor.Components update commit in to previous commit'
         type: boolean
         default: true
-      merge_strategy:
-        description: 'Merge strategy'
-        type: choice
-        options:
-          - Auto (based on label)
-          - Squash
-          - Rebase
 
 jobs:
   merge-to-release-branch:
@@ -46,6 +46,19 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get pull request number
+        id: get_pr_number
+        run: |
+          if ! ./.github/workflows/scripts/get-pull-request-number.sh ${{ inputs.source_branch }}; then
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Echo pull request number
+        run: |
+          echo "PR #${{ steps.get_pr_number.outputs.pr_number }}"
 
       - name: Configure Git
         run: |
