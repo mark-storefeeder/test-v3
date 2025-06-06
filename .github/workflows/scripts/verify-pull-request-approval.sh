@@ -1,6 +1,7 @@
 # Alias the input parameters to more descriptive names
 pr_number=$1
-team_name=$2
+team_repository_owner=$2
+team_name=$3
 
 # Get the list of reviewers who have approved this pull request
 if ! approvals=$(gh pr view $pr_number --json reviews --jq '.reviews[] | select(.state == "APPROVED") | .author.login'); then
@@ -14,7 +15,7 @@ if [ -z "$approvals" ]; then
 fi
 
 # Get the list of team members
-if ! team_members=$(gh api orgs/StoreFeeder/teams/$team_name/members --jq '.[].login'); then
+if ! team_members=$(gh api orgs/$team_repository_owner/teams/$team_name/members --jq '.[].login'); then
   echo "::error::Failed to get the list of team members for team $team_name"
   exit 1
 fi
