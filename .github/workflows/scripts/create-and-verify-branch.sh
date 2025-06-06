@@ -6,10 +6,10 @@ branch=$2
 if gh api repos/$repository/branches/$branch --silent; then
     main_sha=$(gh api repos/$repository/branches/main --jq .commit.sha)
     branch_sha=$(gh api repos/$repository/branches/$branch --jq .commit.sha)
-
-    # Check if branch is behind main
-    if ! gh api repos/$repository/compare/$branch_sha...$main_sha --jq .behind_by | grep -q '^0$'; then
-        echo "::error::The branch $branch is behind main. Please update it before trying again."
+    behind_by=$(gh api repos/$repository/compare/$main_sha...$branch_sha --jq .behind_by)
+    
+    if [ "$behind_by" -gt 0 ]; then
+        echo "::error::The branch $branch is $behind_by commit(s) behind main. Please update it before trying again."
         exit 1
     fi
     
