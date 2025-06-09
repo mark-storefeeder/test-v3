@@ -1,6 +1,31 @@
-# Alias the input parameters to more descriptive names
-repository=$1
-branch=$2
+# Parse named parameters
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --repository=*)
+      repository="${1#*=}"
+      shift
+      ;;
+    --branch=*)
+      branch="${1#*=}"
+      shift
+      ;;
+    *)
+      echo "::error::Unknown parameter supplied to verify-branch-exists.sh: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Validate required parameters
+if [ -z "$repository" ]; then
+  echo "::error::Missing required parameter 'repository'"
+  exit 1
+fi
+
+if [ -z "$branch" ]; then
+  echo "::error::Missing required parameter 'branch'"
+  exit 1
+fi
 
 if ! output=$(gh api repos/$repository/branches/$branch --jq .name 2>&1); then
   if echo "$output" | grep -q "Branch not found"; then

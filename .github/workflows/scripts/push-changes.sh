@@ -1,7 +1,30 @@
-# Alias the input parameters to more descriptive names
-branch=$1
-dry_run=$2
-force_push=$3
+# Parse named parameters
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --branch=*)
+      branch="${1#*=}"
+      shift
+      ;;
+    --dry-run=*)
+      dry_run="${1#*=}"
+      shift
+      ;;
+    --force-push=*)
+      force_push="${1#*=}"
+      shift
+      ;;
+    *)
+      echo "::error::Unknown parameter supplied to push-changes.sh: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Validate required parameters
+if [ -z "$branch" ]; then
+  echo "::error::Missing required parameter 'branch'"
+  exit 1
+fi
 
 push_command="git push origin $branch"
 

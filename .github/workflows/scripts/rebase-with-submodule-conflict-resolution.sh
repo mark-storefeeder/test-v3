@@ -1,7 +1,40 @@
-# Alias the input parameters to more descriptive names
-branch_to_rebase=$1
-base_branch=$2
-submodule_path=$3
+# Parse named parameters
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --source-branch=*)
+      branch_to_rebase="${1#*=}"
+      shift
+      ;;
+    --target-branch=*)
+      base_branch="${1#*=}"
+      shift
+      ;;
+    --submodule-path=*)
+      submodule_path="${1#*=}"
+      shift
+      ;;
+    *)
+      echo "::error::Unknown parameter supplied to rebase-with-submodule-conflict-resolution.sh: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Validate required parameters
+if [ -z "$branch_to_rebase" ]; then
+  echo "::error::Missing required parameter 'source-branch'"
+  exit 1
+fi
+
+if [ -z "$base_branch" ]; then
+  echo "::error::Missing required parameter 'target-branch'"
+  exit 1
+fi
+
+if [ -z "$submodule_path" ]; then
+  echo "::error::Missing required parameter 'submodule-path'"
+  exit 1
+fi
 
 cleanup() {
   # Cleanup after ourselves in case subsequent scripts need to run

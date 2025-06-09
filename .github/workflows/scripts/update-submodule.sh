@@ -1,9 +1,58 @@
-# Alias the input parameters to more descriptive names
-local_branch=$1
-submodule_repository=$2
-submodule_branch=$3
-submodule_path=$4
-squash_commit=$5
+# Parse named parameters
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --local-branch=*)
+      local_branch="${1#*=}"
+      shift
+      ;;
+    --submodule-repository=*)
+      submodule_repository="${1#*=}"
+      shift
+      ;;
+    --submodule-branch=*)
+      submodule_branch="${1#*=}"
+      shift
+      ;;
+    --submodule-path=*)
+      submodule_path="${1#*=}"
+      shift
+      ;;
+    --squash-commit=*)
+      squash_commit="${1#*=}"
+      shift
+      ;;
+    *)
+      echo "::error::Unknown parameter supplied to update-submodule.sh: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Validate required parameters
+if [ -z "$local_branch" ]; then
+  echo "::error::Missing required parameter 'local-branch'"
+  exit 1
+fi
+
+if [ -z "$submodule_repository" ]; then
+  echo "::error::Missing required parameter 'submodule-repository'"
+  exit 1
+fi
+
+if [ -z "$submodule_branch" ]; then
+  echo "::error::Missing required parameter 'submodule-branch'"
+  exit 1
+fi
+
+if [ -z "$submodule_path" ]; then
+  echo "::error::Missing required parameter 'submodule-path'"
+  exit 1
+fi
+
+if [ -z "$squash_commit" ]; then
+  echo "::error::Missing required parameter 'squash-commit'"
+  exit 1
+fi
 
 cleanup() {
   # Cleanup after ourselves in case subsequent scripts need to run
@@ -16,7 +65,7 @@ current_branch=$(git branch --show-current)
 trap cleanup EXIT
 
 # Check whether the target branch exists in the submodule repository
-if ! .github/workflows/scripts/verify-branch-exists.sh $submodule_repository $submodule_branch; then
+if ! .github/workflows/scripts/verify-branch-exists.sh --repository="$submodule_repository" --branch="$submodule_branch"; then
   exit_code=$?
   if [ $exit_code -eq 2 ]; then
     echo "::notice::The $submodule_branch branch does not exist in submodule repository; skipping submodule update."
