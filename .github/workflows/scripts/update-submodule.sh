@@ -109,7 +109,7 @@ fi
 if git diff --staged --quiet; then
   echo "::notice::$submodule_path is already up to date with the branch $submodule_branch in the submodule repository."
 else
-  submodule_commit=$(git submodule status $submodule_path | cut -d' ' -f2)
+  submodule_commit=$(git submodule status $submodule_path | cut -d' ' -f2 | cut -c1-7)
 
   if [ "$squash_commit" = "true" ]; then
     git commit --amend --no-edit --allow-empty
