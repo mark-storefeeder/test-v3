@@ -91,3 +91,16 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push changes
+        run: |
+          if ! git push origin ${{ inputs.target_branch }} --dry-run; then
+            echo "::error::Failed to push changes to ${{ inputs.target_branch }}."
+            exit 1
+          fi
+          if ! git push origin ${{ inputs.source_branch }} --dry-run --force-with-lease; then
+            echo "::error::Failed to push changes to ${{ inputs.source_branch }}."
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
