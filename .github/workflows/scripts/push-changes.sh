@@ -37,7 +37,11 @@ if [ "$force_push" = "true" ]; then
 fi
 
 if $push_command; then
-  echo "::notice::Changes to $branch branch have been pushed."
+  if [ "$dry_run" = "true" ]; then
+    echo "::notice::Changes to $branch branch have been pushed (dry run)."
+  else
+    echo "::notice::Changes to $branch branch have been pushed."
+  fi
 else
   echo "::error::Failed to push changes to $branch branch."
   exit 1
