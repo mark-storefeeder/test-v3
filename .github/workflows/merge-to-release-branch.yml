@@ -112,9 +112,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Merge pull request
+      #- name: Merge pull request
+      #  run: |
+      #    if ! ./.github/workflows/scripts/merge-pull-request.sh --pull-request-number="${{ steps.get_pull_request_number.outputs.pull_request_number }}" --merge-strategy="${{ inputs.merge_strategy }}"; then
+      #      exit 1
+      #    fi
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create pull request
         run: |
-          if ! ./.github/workflows/scripts/merge-pull-request.sh --pull-request-number="${{ steps.get_pull_request_number.outputs.pull_request_number }}" --merge-strategy="${{ inputs.merge_strategy }}"; then
+          if ! ./.github/workflows/scripts/create-pull-request.sh --branch="${{ inputs.target_branch }}"; then
             exit 1
           fi
         env:
