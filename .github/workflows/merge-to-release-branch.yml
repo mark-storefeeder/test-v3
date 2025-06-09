@@ -94,7 +94,7 @@ jobs:
 
       - name: Push changes
         run: |
-          if ! ./.github/workflows/scripts/push-changes.sh --branch="${{ inputs.target_branch }}" --dry-run=true --force-push=false; then
+          if ! ./.github/workflows/scripts/push-changes.sh --branch="${{ inputs.target_branch }}" --force-push=false; then
             exit 1
           fi
           if ! ./.github/workflows/scripts/push-changes.sh --branch="${{ inputs.source_branch }}" --dry-run=true --force-push=true; then
