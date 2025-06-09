@@ -22,6 +22,9 @@ if [ -z "$pull_request_number" ]; then
   exit 1
 fi
 
+# Convert merge strategy to lowercase for case-insensitive comparison
+merge_strategy=$(echo "$merge_strategy" | tr '[:upper:]' '[:lower:]')
+
 if [ "$merge_strategy" != "squash" ] && [ "$merge_strategy" != "rebase" ]; then
   if gh pr view $pull_request_number --json labels --jq '.labels[].name' | grep -q "don't squash"; then
     merge_strategy="rebase"
