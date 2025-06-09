@@ -43,6 +43,14 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
 
+      - name: Fetch base branch
+        run: |
+          if ! ./.github/workflows/scripts/fetch-branch.sh --repository="${{ github.repository }}" --branch="${{ inputs.base_branch }}"; then
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Rebase branch
         run: |
           if ! ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh --branch="${{ inputs.branch }}" --base-branch="${{ inputs.base_branch }}" --submodule-path="modules/test-components"; then

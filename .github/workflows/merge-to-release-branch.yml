@@ -70,9 +70,9 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
 
-      - name: Create and verify target branch
+      - name: Fetch or create target branch
         run: |
-          if ! ./.github/workflows/scripts/fetch-or-create-branch.sh --repository="${{ github.repository }}" --branch="${{ inputs.target_branch }}"; then
+          if ! ./.github/workflows/scripts/fetch-branch.sh --repository="${{ github.repository }}" --branch="${{ inputs.target_branch }}" --create=true; then
             exit 1
           fi
         env:
@@ -86,7 +86,7 @@ jobs:
       
       - name: Update submodule
         run: |
-          if ! ./.github/workflows/scripts/update-submodule.sh --local-branch="${{ inputs.source_branch }}" --submodule-repository="${{ github.repository_owner }}/test-components" --submodule-branch="${{ inputs.target_branch }}" --submodule-path="modules/test-components" --squash-commit="${{ inputs.squash_sfblazor_components_update_commit }}"; then
+          if ! ./.github/workflows/scripts/update-submodule.sh --local-branch="${{ inputs.source_branch }}" --submodule-repository="${{ github.repository_owner }}/test-components" --submodule-branch="${{ inputs.target_branch }}" --submodule-path="modules/test-components" --squash-commit=${{ inputs.squash_sfblazor_components_update_commit }}; then
             exit 1
           fi
         env:

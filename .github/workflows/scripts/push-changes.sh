@@ -26,6 +26,15 @@ if [ -z "$branch" ]; then
   exit 1
 fi
 
+# Set default values for parameters if not provided
+if [ -z "$dry_run" ]; then
+  dry_run="false"
+fi
+
+if [ -z "$force_push" ]; then
+  force_push="false"
+fi
+
 push_command="git push origin $branch"
 
 if [ "$dry_run" = "true" ]; then
