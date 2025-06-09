@@ -102,3 +102,12 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update pull request base branch
+        run:
+          if ! gh pr edit ${{ steps.get_pull_request_number.outputs.pull_request_number }} --base ${{ inputs.target_branch }}; then
+            echo "::error::Could not update pull request base branch."
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
