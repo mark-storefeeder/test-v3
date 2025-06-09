@@ -49,7 +49,7 @@ jobs:
 
       - name: Push changes
         run: |
-          if ! ./.github/workflows/scripts/push-changes.sh --branch="${{ inputs.branch }}" --dry-run=true --force-push=true; then
+          if ! ./.github/workflows/scripts/push-changes.sh --branch="${{ inputs.branch }}" --force-push=true; then
             exit 1
           fi
         env:
