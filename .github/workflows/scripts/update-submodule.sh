@@ -115,7 +115,7 @@ else
     git commit --amend --no-edit --allow-empty
     echo "::notice::$submodule_path has been updated to reference the head of the branch $submodule_branch (commit $submodule_commit) in the submodule repository and the commit has been squashed into the previous commit."
   else
-    git commit --message "Update $submodule_path to reference $submodule_branch branch"
+    git commit --message "Update $submodule_path to reference head of $submodule_branch"
     echo "::notice::$submodule_path has been updated to reference the head of the branch $submodule_branch (commit $submodule_commit) in the submodule repository."
   fi
 fi
