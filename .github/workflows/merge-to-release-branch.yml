@@ -86,7 +86,7 @@ jobs:
       
       - name: Update submodule
         run: |
-          if ! ./.github/workflows/scripts/update-submodule.sh ${{ inputs.source_branch }} ${{ github.repository }}/test-components ${{ inputs.target_branch }} modules/test-components ${{ inputs.squash_sfblazor_components_update_commit }}; then
+          if ! ./.github/workflows/scripts/update-submodule.sh ${{ inputs.source_branch }} ${{ github.repository_owner }}/test-components ${{ inputs.target_branch }} modules/test-components ${{ inputs.squash_sfblazor_components_update_commit }}; then
             exit 1
           fi
         env:
