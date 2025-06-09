@@ -20,12 +20,15 @@ fi
 
 # Check if a pull request already exists
 if ! gh pr list --head $branch --base main --json number --jq 'length' | grep -q '^[1-9]'; then
-  gh pr create \
+  if ! gh pr create \
     --title $branch \
     --body $branch \
     --head $branch \
     --base main \
-    --label "don't squash"
+    --label "don't squash"; then
+    echo "::error::Failed to create pull request for branch $branch."
+    exit 1
+  fi
 
   echo "::notice::A pull request for branch $branch has been created."
 else
