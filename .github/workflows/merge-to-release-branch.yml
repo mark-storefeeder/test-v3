@@ -24,7 +24,7 @@ on:
         description: 'Require approval from dev team member'
         type: boolean
         default: true
-      squash_sfblazor_components_update_commit:
+      squash_sf_blazor_components_update_commit:
         description: 'Squash SfBlazor.Components update commit in to previous commit'
         type: boolean
         default: true
@@ -86,7 +86,7 @@ jobs:
       
       - name: Update submodule
         run: |
-          if ! ./.github/workflows/scripts/update-submodule.sh --local-branch="${{ inputs.source_branch }}" --submodule-repository="${{ github.repository_owner }}/test-components" --submodule-branch="${{ inputs.target_branch }}" --submodule-path="modules/test-components" --squash-commit=${{ inputs.squash_sfblazor_components_update_commit }}; then
+          if ! ./.github/workflows/scripts/update-submodule.sh --local-branch="${{ inputs.source_branch }}" --submodule-repository="${{ github.repository_owner }}/test-components" --submodule-branch="${{ inputs.target_branch }}" --submodule-path="modules/test-components" --squash-commit=${{ inputs.squash_sf_blazor_components_update_commit }}; then
             exit 1
           fi
         env:
