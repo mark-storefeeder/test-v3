@@ -109,11 +109,13 @@ fi
 if git diff --staged --quiet; then
   echo "::notice::$submodule_path is already up to date with the branch $submodule_branch in the submodule repository."
 else
+  submodule_commit=$(git submodule status $submodule_path | cut -d' ' -f2)
+
   if [ "$squash_commit" = "true" ]; then
     git commit --amend --no-edit --allow-empty
-    echo "::notice::$submodule_path has been updated to reference the head of the branch $submodule_branch in the submodule repository and the commit has been squashed into the previous commit."
+    echo "::notice::$submodule_path has been updated to reference the head of the branch $submodule_branch (commit $submodule_commit) in the submodule repository and the commit has been squashed into the previous commit."
   else
     git commit --message "Update $submodule_path to reference $submodule_branch branch"
-    echo "::notice::$submodule_path has been updated to reference the head of the branch $submodule_branch in the submodule repository."
+    echo "::notice::$submodule_path has been updated to reference the head of the branch $submodule_branch (commit $submodule_commit) in the submodule repository."
   fi
 fi
