@@ -1,0 +1,70 @@
+# Alias the input parameters to more descriptive names
+local_branch=$1
+submodule_repository=$2
+submodule_branch=$3
+submodule_path=$4
+squash_commit=$5
+
+cleanup() {
+  # Cleanup after ourselves in case subsequent scripts need to run
+  git checkout $current_branch
+  git submodule update --init --recursive
+}
+
+current_branch=$(git branch --show-current)
+
+trap cleanup EXIT
+
+# Check whether the target branch exists in the submodule repository
+if ! .github/workflows/scripts/verify-branch-exists.sh $submodule_repository $submodule_branch; then
+  exit_code=$?
+  if [ $exit_code -eq 2 ]; then
+    echo "::notice::The $submodule_branch branch does not exist in submodule repository; skipping submodule update."
+  else
+    exit 1
+  fi
+fi
+
+original_path=$(pwd)
+
+if ! git checkout $local_branch; then
+  echo "::error::Could not checkout $local_branch."
+  exit 1
+fi
+
+if ! git submodule update --init --recursive; then
+  echo "::error::Submodule update failed for $local_branch."
+  exit 1
+fi
+
+cd $submodule_path
+
+if ! git fetch origin $submodule_branch; then
+  echo "::error::Could not fetch origin/$submodule_branch."
+  exit 1
+fi
+
+if ! git checkout $submodule_branch; then
+  echo "::error::Could not checkout $submodule_branch."
+  exit 1
+fi
+
+cd $original_path
+
+# Update the submodule to reference the head of the target branch in the submodule repository
+if ! git add $submodule_path; then
+  echo "::error::Could not add $submodule_path."
+  exit 1
+fi
+
+if git diff --staged --quiet; then
+  echo "::notice::$submodule_path is already up to date with the $submodule_branch branch in the submodule repository."
+else
+  if [ "$squash_commit" = "true" ]; then
+    git commit --amend --no-edit --allow-empty
+    echo "::notice::$submodule_path has been updated to reference the head of the $submodule_branch branch in the submodule repository and the commit has been squashed into the previous commit."
+  else
+    git commit --message "Update $submodule_path to reference $submodule_branch branch"
+    echo "::notice::$submodule_path has been updated to reference the head of the $submodule_branch branch in the submodule repository."
+  fi
+fi

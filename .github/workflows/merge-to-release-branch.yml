@@ -80,4 +80,14 @@ jobs:
 
       - name: Rebase branch
         run: |
-          ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh ${{ inputs.source_branch }} ${{ inputs.target_branch }} modules/test-components
+          if ! ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh ${{ inputs.source_branch }} ${{ inputs.target_branch }} modules/test-components; then
+            exit 1
+          fi
+      
+      - name: Update submodule
+        run: |
+          if ! ./.github/workflows/scripts/update-submodule.sh ${{ inputs.source_branch }} ${{ github.repository }}/test-components ${{ inputs.target_branch }} modules/test-components ${{ inputs.squash_sfblazor_components_update_commit }}; then
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
