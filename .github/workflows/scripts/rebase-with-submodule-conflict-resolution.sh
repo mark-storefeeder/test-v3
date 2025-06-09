@@ -39,13 +39,11 @@ if ! git submodule update --init --recursive; then
 fi
 
 if output=$(git -c advice.mergeConflict=false -c advice.submoduleMergeConflict=false rebase $base_branch 2>&1); then
-  # git push origin $branch_to_rebase --force-with-lease
   echo "::notice::Successfully rebased $branch_to_rebase onto $base_branch."
 else
   # Check if we're in a rebase state (which indicates conflicts)
   if [ -d ".git/rebase-merge" ] || [ -d ".git/rebase-apply" ]; then
     handle_conflicts
-    # git push origin $branch_to_rebase --force-with-lease
     echo "::notice::Successfully rebased $branch_to_rebase onto $base_branch with submodule conflict resolution."
   else
     echo "::error::Could not rebase $branch_to_rebase onto $base_branch due to an unhandled error: $output"
