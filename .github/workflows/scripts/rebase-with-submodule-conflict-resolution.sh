@@ -1,11 +1,11 @@
 # Parse named parameters
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --source-branch=*)
-      branch_to_rebase="${1#*=}"
+    --branch=*)
+      branch="${1#*=}"
       shift
       ;;
-    --target-branch=*)
+    --base-branch=*)
       base_branch="${1#*=}"
       shift
       ;;
@@ -21,13 +21,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate required parameters
-if [ -z "$branch_to_rebase" ]; then
-  echo "::error::Missing required parameter 'source-branch'"
+if [ -z "$branch" ]; then
+  echo "::error::Missing required parameter 'branch'"
   exit 1
 fi
 
 if [ -z "$base_branch" ]; then
-  echo "::error::Missing required parameter 'target-branch'"
+  echo "::error::Missing required parameter 'base-branch'"
   exit 1
 fi
 
@@ -51,7 +51,7 @@ handle_conflicts() {
       handle_conflicts # Recursively call handle_conflicts to handle multiple conflicts
     fi
   else
-    echo "::error::Could not rebase $branch_to_rebase onto $base_branch due to non-submodule conflicts. Please rebase manually instead."
+    echo "::error::Could not rebase the branch $branch onto $base_branch due to non-submodule conflicts. Please rebase manually instead."
     git rebase --abort
     exit 1
   fi
@@ -61,25 +61,25 @@ current_branch=$(git branch --show-current)
 
 trap cleanup EXIT
 
-if ! git checkout $branch_to_rebase; then
-  echo "::error::Could not checkout $branch_to_rebase."
+if ! git checkout $branch; then
+  echo "::error::Could not checkout the branch $branch."
   exit 1
 fi
 
 if ! git submodule update --init --recursive; then
-  echo "::error::Submodule update failed for $branch_to_rebase."
+  echo "::error::Submodule update failed for the branch $branch."
   exit 1
 fi
 
 if output=$(git -c advice.mergeConflict=false -c advice.submoduleMergeConflict=false rebase $base_branch 2>&1); then
-  echo "::notice::Successfully rebased $branch_to_rebase onto $base_branch."
+  echo "::notice::Successfully rebased $branch onto $base_branch."
 else
   # Check if we're in a rebase state (which indicates conflicts)
   if [ -d ".git/rebase-merge" ] || [ -d ".git/rebase-apply" ]; then
     handle_conflicts
-    echo "::notice::Successfully rebased $branch_to_rebase onto $base_branch with submodule conflict resolution."
+    echo "::notice::Successfully rebased $branch onto $base_branch with submodule conflict resolution."
   else
-    echo "::error::Could not rebase $branch_to_rebase onto $base_branch due to an unhandled error: $output"
+    echo "::error::Could not rebase $branch onto $base_branch due to an unhandled error: $output"
     exit 1
   fi
 fi

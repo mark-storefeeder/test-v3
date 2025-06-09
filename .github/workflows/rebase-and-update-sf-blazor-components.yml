@@ -1,0 +1,66 @@
+name: Rebase and update SfBlazor.Components
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch'
+        type: string
+        required: true
+      base_branch:
+        description: 'Base branch'
+        type: string
+        required: true
+      sf_blazor_components_branch:
+        description: 'SfBlazor.Components branch'
+        type: string
+        required: true
+      squash_sfblazor_components_update_commit:
+        description: 'Squash SfBlazor.Components update commit in to previous commit'
+        type: boolean
+        default: true
+
+jobs:
+  merge-to-release-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify source branch exists
+        run: |
+          if ! ./.github/workflows/scripts/verify-branch-exists.sh --repository="${{ github.repository }}" --branch="${{ inputs.branch }}"; then
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Rebase branch
+        run: |
+          if ! ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh --branch="${{ inputs.branch }}" --base-branch="${{ inputs.base_branch }}" --submodule-path="modules/test-components"; then
+            exit 1
+          fi
+      
+      - name: Update submodule
+        run: |
+          if ! ./.github/workflows/scripts/update-submodule.sh --local-branch="${{ inputs.branch }}" --submodule-repository="${{ github.repository_owner }}/test-components" --submodule-branch="${{ inputs.sf_blazor_components_branch }}" --submodule-path="modules/test-components" --squash-commit="${{ inputs.squash_sfblazor_components_update_commit }}"; then
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push changes
+        run: |
+          if ! ./.github/workflows/scripts/push-changes.sh --branch="${{ inputs.branch }}" --dry-run=true --force-push=true; then
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

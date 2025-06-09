@@ -80,7 +80,7 @@ jobs:
 
       - name: Rebase branch
         run: |
-          if ! ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh --source-branch="${{ inputs.source_branch }}" --target-branch="${{ inputs.target_branch }}" --submodule-path="modules/test-components"; then
+          if ! ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh --branch="${{ inputs.source_branch }}" --base-branch="${{ inputs.target_branch }}" --submodule-path="modules/test-components"; then
             exit 1
           fi
       
