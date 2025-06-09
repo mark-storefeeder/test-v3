@@ -9,8 +9,15 @@ on:
         required: true
       base_branch:
         description: 'Base branch'
-        type: string
+        type: choice
+        options:
+          - Custom (specify below)
+          - release/dev
+          - release/uat
         required: true
+      custom_base_branch:
+        description: 'Custom base branch'
+        type: string
       sf_blazor_components_branch:
         description: 'SfBlazor.Components branch'
         type: string
@@ -24,6 +31,19 @@ jobs:
   merge-to-release-branch:
     runs-on: ubuntu-latest
     steps:
+      - name: Resolve base branch
+        id: resolve-base-branch
+        run: |
+          if [ "${{ inputs.base_branch }}" = "Custom (specify below)" ] && [ -z "${{ inputs.custom_base_branch }}" ]; then
+            echo "::error::'Custom base branch' must be specified when 'Custom (specify below)' is selected from the base branch options."
+            exit 1
+          fi
+
+          resolved_base_branch=$([ "${{ inputs.base_branch }}" = "Custom (specify below)" ] && "${{ inputs.custom_base_branch }}" || echo "${{ inputs.base_branch }}")
+          echo "Resolved base branch: ${resolved_base_branch}"
+          echo "resolved_base_branch=${resolved_base_branch}" >> $GITHUB_OUTPUT
+          exit 1
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -45,7 +65,7 @@ jobs:
 
       - name: Fetch base branch
         run: |
-          if ! ./.github/workflows/scripts/fetch-branch.sh --repository="${{ github.repository }}" --branch="${{ inputs.base_branch }}"; then
+          if ! ./.github/workflows/scripts/fetch-branch.sh --repository="${{ github.repository }}" --branch="${{ steps.resolve-base-branch.outputs.resolved_base_branch }}"; then
             exit 1
           fi
         env:
@@ -53,7 +73,7 @@ jobs:
 
       - name: Rebase branch
         run: |
-          if ! ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh --branch="${{ inputs.branch }}" --base-branch="${{ inputs.base_branch }}" --submodule-path="modules/test-components"; then
+          if ! ./.github/workflows/scripts/rebase-with-submodule-conflict-resolution.sh --branch="${{ inputs.branch }}" --base-branch="${{ steps.resolve-base-branch.outputs.resolved_base_branch }}" --submodule-path="modules/test-components"; then
             exit 1
           fi
       
