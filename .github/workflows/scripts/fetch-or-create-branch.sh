@@ -38,7 +38,7 @@ if gh api repos/$repository/branches/$branch --silent; then
         exit 1
     fi
 
-    if ! git fetch origin $branch; then
+    if ! git fetch origin $branch:$branch; then
         echo "::error::Failed to fetch the branch $branch from origin."
         exit 1
     fi
