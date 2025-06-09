@@ -68,7 +68,7 @@ trap cleanup EXIT
 if ! .github/workflows/scripts/verify-branch-exists.sh --repository="$submodule_repository" --branch="$submodule_branch"; then
   exit_code=$?
   if [ $exit_code -eq 2 ]; then
-    echo "::notice::The $submodule_branch branch does not exist in submodule repository; skipping submodule update."
+    echo "::notice::The branch $submodule_branch does not exist in the submodule repository; skipping submodule update."
   else
     exit 1
   fi
@@ -77,12 +77,12 @@ fi
 original_path=$(pwd)
 
 if ! git checkout $local_branch; then
-  echo "::error::Could not checkout $local_branch."
+  echo "::error::Could not checkout the branch $local_branch."
   exit 1
 fi
 
 if ! git submodule update --init --recursive; then
-  echo "::error::Submodule update failed for $local_branch."
+  echo "::error::Submodule update failed for the branch $local_branch."
   exit 1
 fi
 
@@ -107,13 +107,13 @@ if ! git add $submodule_path; then
 fi
 
 if git diff --staged --quiet; then
-  echo "::notice::$submodule_path is already up to date with the $submodule_branch branch in the submodule repository."
+  echo "::notice::$submodule_path is already up to date with the branch $submodule_branch in the submodule repository."
 else
   if [ "$squash_commit" = "true" ]; then
     git commit --amend --no-edit --allow-empty
-    echo "::notice::$submodule_path has been updated to reference the head of the $submodule_branch branch in the submodule repository and the commit has been squashed into the previous commit."
+    echo "::notice::$submodule_path has been updated to reference the head of the branch $submodule_branch in the submodule repository and the commit has been squashed into the previous commit."
   else
     git commit --message "Update $submodule_path to reference $submodule_branch branch"
-    echo "::notice::$submodule_path has been updated to reference the head of the $submodule_branch branch in the submodule repository."
+    echo "::notice::$submodule_path has been updated to reference the head of the branch $submodule_branch in the submodule repository."
   fi
 fi

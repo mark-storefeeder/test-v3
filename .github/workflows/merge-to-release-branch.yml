@@ -72,7 +72,7 @@ jobs:
 
       - name: Create and verify target branch
         run: |
-          if ! ./.github/workflows/scripts/create-and-verify-branch.sh --repository="${{ github.repository }}" --branch="${{ inputs.target_branch }}"; then
+          if ! ./.github/workflows/scripts/fetch-or-create-branch.sh --repository="${{ github.repository }}" --branch="${{ inputs.target_branch }}"; then
             exit 1
           fi
         env:

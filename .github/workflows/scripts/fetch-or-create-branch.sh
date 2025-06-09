@@ -37,12 +37,17 @@ if gh api repos/$repository/branches/$branch --silent; then
         echo "::error::The branch $branch is $behind_by commit(s) behind main. Please update it before trying again."
         exit 1
     fi
-    
+
+    if ! git fetch origin $branch; then
+        echo "::error::Failed to fetch the branch $branch from origin."
+        exit 1
+    fi
+
     echo "::notice::The branch $branch already exists and is up to date with main."
 else
     # Create the new branch locally (it will need to be pushed to remote later)
     if ! git branch $branch; then
-        echo "::error::Failed to create branch $branch from main."
+        echo "::error::Failed to create the branch $branch."
         exit 1
     fi
     
